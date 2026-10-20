@@ -1,0 +1,151 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sociales: Mayas y Pipiles</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:"Segoe UI",Arial,sans-serif;background:linear-gradient(160deg,#fff6d6,#d9f2ff);color:#1f2a44;min-height:100vh}
+.wrap{max-width:760px;margin:0 auto;padding:16px}h1{text-align:center;font-size:2rem;margin:10px 0}h2{font-size:1.5rem;margin:8px 0}
+.card{background:#fff;border-radius:20px;padding:20px;box-shadow:0 6px 18px rgba(0,0,0,.1);margin:14px 0}
+.btn{display:block;width:100%;font-size:1.3rem;padding:16px;margin:8px 0;border:0;border-radius:16px;cursor:pointer;color:#fff;background:#2b8de2;font-weight:700}
+.btn.g{background:#22a35a}.btn.o{background:#f08a24}.btn.r{background:#c7362b}.btn.gray{background:#8a94a8}
+.row{display:flex;gap:10px;flex-wrap:wrap}.row .btn{flex:1;min-width:140px}
+.topics label{display:block;font-size:1.25rem;padding:10px;background:#e8f3ff;border-radius:12px;margin:6px 0;cursor:pointer}
+.topics input{transform:scale(1.5);margin-right:12px}
+.q{font-size:1.45rem;font-weight:700;margin:6px 0 14px}.opt{background:#eef1f6;color:#1f2a44;text-align:left}
+.opt.ok{background:#22a35a;color:#fff}.opt.bad{background:#c7362b;color:#fff}
+.exp{font-size:1.15rem;background:#fff6d6;border-left:6px solid #ffbf00;padding:12px;border-radius:10px;margin-top:10px}
+.stats{display:flex;justify-content:space-between;font-size:1.15rem;font-weight:700;flex-wrap:wrap;gap:8px}
+.tag{display:inline-block;padding:4px 10px;border-radius:10px;background:#ffd9cc;font-size:.95rem;font-weight:700}
+.fc{min-height:200px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:1.4rem;cursor:pointer;background:#e8f3ff}
+.timer{font-size:2rem;text-align:center;font-weight:800;color:#c7362b}.hid{display:none}.msg{font-size:1.3rem;text-align:center;font-weight:700;min-height:1.6em}
+ul{font-size:1.1rem}li{margin:6px 0}
+</style></head><body><div class="wrap">
+<h1>🏛️ Sociales: Mayas y Pipiles</h1>
+<div id="home" class="card">
+<p style="font-size:1.2rem;text-align:center">¡Hola, amiguito! Prepárate para tu examen de Ciudadanía y Valores.</p>
+<button class="btn g" onclick="showStudy()">📖 Estudiar</button>
+<div class="topics" id="topics">
+<label><input type="checkbox" value="pre" checked>🌎 Culturas precolombinas</label>
+<label><input type="checkbox" value="may" checked>🔺 Los mayas</label>
+<label><input type="checkbox" value="pip" checked>🌱 Los pipiles</label>
+</div>
+<div class="row"><button class="btn" onclick="startPractice()">✏️ Practicar</button><button class="btn o" onclick="startChallenge()">⏱️ Desafío 60 s</button></div>
+<p style="text-align:center;font-size:1.1rem">🏆 Récord del desafío: <b id="best">0</b></p>
+</div>
+<div id="study" class="card hid">
+<h2 id="stTitle"></h2><div class="row" id="stTabs"></div>
+<div id="fc" class="card fc" onclick="flip()"></div>
+<p style="text-align:center">Toca la tarjeta para ver la respuesta</p>
+<div class="row"><button class="btn gray" onclick="moveFc(-1)">⬅️ Anterior</button><button class="btn" onclick="moveFc(1)">Siguiente ➡️</button></div>
+<button class="btn r" onclick="home()">🏠 Inicio</button>
+</div>
+<div id="play" class="card hid">
+<div class="stats"><span>✅ <span id="sc">0</span></span><span>🔥 Racha: <span id="st">0</span></span><span id="cnt"></span></div>
+<div id="tm" class="timer hid"></div>
+<p><span class="tag" id="tg"></span></p>
+<div class="q" id="qt"></div><div id="opts"></div>
+<div id="msg" class="msg"></div><div id="exp" class="exp hid"></div>
+<button class="btn g hid" id="nx" onclick="next()">Siguiente ➡️</button>
+<button class="btn r" onclick="finish()">Terminar</button>
+</div>
+<div id="sum" class="card hid"><h2 id="sumT"></h2><p id="sumP" style="font-size:1.2rem"></p><div id="sumL"></div>
+<button class="btn o hid" id="rep" onclick="repeatErrors()">🔁 Repasar errores</button>
+<button class="btn" onclick="home()">🏠 Inicio</button></div>
+</div>
+<script>
+const TN={pre:"Culturas precolombinas",may:"Los mayas",pip:"Los pipiles"};
+// t: m=opción múltiple, v=verdadero/falso, s=¿mayas o pipiles?
+const Q=[
+{c:"pre",t:"m",q:"¿Qué significa «precolombino»?",o:["Antes de la llegada de Cristóbal Colón y los españoles","Después de la llegada de los españoles","Que vive en Colombia","Que vive en Europa"],e:"«Pre» significa «antes». Precolombino = antes de que llegara Colón (1492)."},
+{c:"pre",t:"m",q:"¿En qué año llegó Cristóbal Colón a América?",o:["1492","1821","1200","2000"],e:"Colón llegó a América en 1492."},
+{c:"pre",t:"v",q:"Antes de la llegada de los españoles ya vivían muchos pueblos en América.",a:true,e:"¡Cierto! Había muchos pueblos, como mayas, aztecas, incas y pipiles."},
+{c:"pre",t:"m",q:"¿Cuál de estos pueblos es una cultura precolombina?",o:["Los mayas","Los romanos","Los vikingos","Los egipcios"],e:"Los mayas vivieron en América antes de los españoles. Los otros vivieron en otros continentes."},
+{c:"pre",t:"m",q:"¿Dónde vivían los incas?",o:["En América del Sur (en los Andes, como Perú)","En El Salvador","En España","En África"],e:"Los incas vivieron en la cordillera de los Andes, en América del Sur."},
+{c:"pre",t:"m",q:"¿Dónde vivían los aztecas?",o:["En el centro de México","En Argentina","En Honduras","En Chile"],e:"Los aztecas vivieron en el centro de México. Su gran ciudad era Tenochtitlan."},
+{c:"pre",t:"v",q:"El maíz era un alimento muy importante para los pueblos precolombinos de Mesoamérica.",a:true,e:"¡Sí! El maíz era su alimento principal. ¡Por eso hoy comemos pupusas y tamales!"},
+{c:"pre",t:"m",q:"¿Cómo se llama la región donde vivieron los mayas, aztecas y pipiles?",o:["Mesoamérica","Europa","Asia","Antártida"],e:"Mesoamérica va desde el centro de México hasta parte de Centroamérica. El Salvador está en ella."},
+{c:"pre",t:"v",q:"Los pueblos precolombinos llegaron a América en barcos junto con Colón.",a:false,e:"Falso. Ellos ya vivían en América desde mucho antes de que llegara Colón."},
+{c:"pre",t:"m",q:"¿Qué otro pueblo precolombino vivió en el oriente de El Salvador?",o:["Los lencas","Los incas","Los aztecas","Los vikingos"],e:"Los lencas vivieron en el oriente de El Salvador, al otro lado del río Lempa."},
+{c:"pre",t:"v",q:"Los pueblos precolombinos cultivaban la tierra: maíz, frijol, cacao y más.",a:true,e:"¡Cierto! Eran agricultores. Sembraban maíz, frijol, calabaza, chile y cacao."},
+{c:"pre",t:"m",q:"¿Qué hacían los pueblos precolombinos con el cacao?",o:["Bebidas y también lo usaban como moneda","Ropa","Casas","Barcos"],e:"Con el cacao hacían bebidas, y sus semillas servían para comprar cosas."},
+{c:"pre",t:"v",q:"Todos los pueblos precolombinos hablaban el mismo idioma.",a:false,e:"Falso. Cada pueblo tenía su idioma: los mayas hablaban lenguas mayas, los pipiles náhuat."},
+{c:"may",t:"m",q:"¿En qué fueron muy buenos los mayas?",o:["Matemáticas, astronomía y arquitectura","Fútbol y videojuegos","Construir barcos de vapor","Fabricar carros"],e:"Los mayas son famosos por sus matemáticas, el estudio de las estrellas y sus grandes edificios."},
+{c:"may",t:"m",q:"¿Qué número importante conocían y usaban los mayas?",o:["El cero","El número mil millones","El número pi exacto","Ninguno"],e:"Los mayas usaban el cero, ¡algo que muy pocos pueblos del mundo conocían!"},
+{c:"may",t:"m",q:"Los mayas contaban de 20 en 20. ¿Cómo se llama ese sistema?",o:["Vigesimal","Decimal","Binario","Romano"],e:"Vigesimal viene de «veinte». ¡Quizás contaban con los dedos de manos y pies!"},
+{c:"may",t:"m",q:"En los números mayas, ¿qué valían un punto y una raya?",o:["Punto = 1 y raya = 5","Punto = 10 y raya = 100","Punto = 0 y raya = 1","Punto = 5 y raya = 1"],e:"Un punto vale 1 y una raya vale 5. El cero lo dibujaban como una concha."},
+{c:"may",t:"m",q:"¿Qué es la astronomía?",o:["El estudio del cielo: el sol, la luna y las estrellas","El estudio de los animales","El estudio de las plantas","El estudio de los números"],e:"Los mayas observaban el cielo y así hicieron calendarios muy exactos."},
+{c:"may",t:"v",q:"Los mayas hicieron calendarios muy exactos observando el cielo.",a:true,e:"¡Cierto! Tenían un calendario de 365 días y otro de 260 días."},
+{c:"may",t:"m",q:"¿Qué construcciones famosas hicieron los mayas?",o:["Pirámides y templos","Rascacielos de vidrio","Castillos medievales","Puentes de acero"],e:"Construyeron pirámides y templos de piedra, como en Tikal y Chichén Itzá."},
+{c:"may",t:"m",q:"¿En qué país está la ciudad maya de Tikal?",o:["Guatemala","Perú","España","Estados Unidos"],e:"Tikal está en Guatemala, en la selva de Petén."},
+{c:"may",t:"m",q:"¿En qué país está Chichén Itzá?",o:["México","El Salvador","Chile","Brasil"],e:"Chichén Itzá está en la península de Yucatán, en México."},
+{c:"may",t:"m",q:"¿Cuál de estos sitios mayas está en El Salvador?",o:["Tazumal","Tikal","Machu Picchu","Tenochtitlan"],e:"Tazumal está en Chalchuapa, Santa Ana, El Salvador."},
+{c:"may",t:"m",q:"¿Cómo le dicen a Joya de Cerén?",o:["La «Pompeya de América»","La ciudad de oro","La pirámide más alta","La capital azteca"],e:"Un volcán la cubrió de ceniza y se conservaron casas, vasijas y hasta comida."},
+{c:"may",t:"v",q:"Joya de Cerén es un pueblo antiguo que quedó cubierto por la ceniza de un volcán.",a:true,e:"¡Cierto! Por eso se conservó tan bien. Está en La Libertad y es Patrimonio de la Humanidad."},
+{c:"may",t:"m",q:"¿Qué sitio arqueológico maya está en el valle de Zapotitán, La Libertad?",o:["San Andrés","Chichén Itzá","Tikal","Cuzco"],e:"San Andrés está en La Libertad, cerca de Joya de Cerén."},
+{c:"may",t:"v",q:"Los mayas tenían su propia escritura con dibujos llamados glifos.",a:true,e:"¡Sí! Escribían con glifos en piedra, cerámica y libros llamados códices."},
+{c:"may",t:"v",q:"Los mayas vivieron solo en El Salvador.",a:false,e:"Falso. Vivieron en el sur de México, Guatemala, Belice, Honduras y el occidente de El Salvador."},
+{c:"may",t:"m",q:"¿Cuál era el alimento más importante para los mayas?",o:["El maíz","El arroz","El trigo","La papa frita"],e:"Para los mayas el maíz era sagrado. ¡Su historia dice que los hombres fueron hechos de maíz!"},
+{c:"pip",t:"m",q:"¿Qué idioma hablaban los pipiles?",o:["Náhuat","Inglés","Maya","Alemán"],e:"Los pipiles hablaban náhuat. Todavía hay personas en El Salvador que lo hablan."},
+{c:"pip",t:"m",q:"¿Dónde vivieron los pipiles?",o:["En gran parte de El Salvador (centro y occidente)","En Perú","En España","En Canadá"],e:"Los pipiles vivieron en el centro y occidente de El Salvador."},
+{c:"pip",t:"m",q:"¿Qué significa «pipil»?",o:["Nobles o príncipes","Emigrantes","Pescadores","Guerreros del mar"],e:"Pipil significa «nobles» o «príncipes»."},
+{c:"pip",t:"m",q:"¿Qué significa «yaquis», otro nombre de los pipiles?",o:["Emigrantes","Príncipes","Reyes","Agricultores"],e:"Yaquis significa «emigrantes», porque vinieron de otras tierras."},
+{c:"pip",t:"m",q:"¿Quién guió a los pipiles cuando llegaron a El Salvador?",o:["Topiltzin Acxitl","Cristóbal Colón","Pedro de Alvarado","Moctezuma"],e:"Topiltzin Acxitl fue el líder que los guió. ¡Es el de tu exposición!"},
+{c:"pip",t:"m",q:"¿En qué siglo llegaron los pipiles a El Salvador?",o:["En el siglo XI","En el siglo XX","En el siglo I","En el siglo XXI"],e:"Llegaron en el siglo XI, hace casi mil años."},
+{c:"pip",t:"m",q:"¿Cómo se llamaba la región de los pipiles?",o:["Señorío de Cuzcatlán","Imperio Inca","Tenochtitlan","Reino de España"],e:"Su territorio se llamaba Señorío de Cuzcatlán."},
+{c:"pip",t:"m",q:"¿Qué significa «Cuzcatlán»?",o:["Lugar de joyas o collares","Lugar de volcanes","Tierra de agua","Ciudad del sol"],e:"Cuzcatlán significa «lugar de joyas» o «lugar de collares»."},
+{c:"pip",t:"v",q:"Los pipiles fueron los pobladores más recientes de El Salvador antes de los españoles.",a:true,e:"¡Cierto! Llegaron después que otros pueblos, como los mayas y lencas."},
+{c:"pip",t:"m",q:"¿De qué pueblos más antiguos venían los pipiles?",o:["Nahuas, mayas-quiché y aztecas","Incas y vikingos","Romanos y griegos","Chinos y japoneses"],e:"Vienen de nahuas, mayas-quiché y aztecas."},
+{c:"pip",t:"v",q:"Santa Ana, Sonsonate y San Salvador eran parte del territorio pipil.",a:true,e:"¡Sí! También Ahuachapán, La Libertad, Cuscatlán, La Paz, Chalatenango y San Vicente."},
+{c:"pip",t:"v",q:"Los pipiles vivieron principalmente en el oriente de El Salvador, en La Unión y Morazán.",a:false,e:"Falso. Vivieron en el centro y occidente. En el oriente vivían los lencas."},
+{c:"pip",t:"m",q:"¿Qué cultivo era muy valioso para los pipiles y servía como moneda?",o:["El cacao","El café","La manzana","El trigo"],e:"El cacao era muy valioso: con sus semillas compraban cosas. (El café llegó mucho después.)"},
+{c:"pip",t:"v",q:"Muchos lugares de El Salvador tienen nombres en náhuat, como Ahuachapán o Chalatenango.",a:true,e:"¡Cierto! Muchos nombres de lugares vienen del náhuat de los pipiles."},
+{c:"pip",t:"m",q:"¿Quién era Topiltzin Acxitl?",o:["Líder o rey que guió a su pueblo","Navegante español","Científico maya","Pirata"],e:"Topiltzin Acxitl fue el líder (rey) que guió a los pipiles."},
+{c:"may",t:"s",q:"Usaban el número cero y contaban de 20 en 20.",a:"Mayas",e:"Los mayas inventaron un sistema con el cero y base 20."},
+{c:"may",t:"s",q:"Construyeron Tikal y Chichén Itzá.",a:"Mayas",e:"Tikal y Chichén Itzá son ciudades mayas."},
+{c:"may",t:"s",q:"Escribían con glifos y hacían calendarios exactos.",a:"Mayas",e:"Los glifos y los calendarios son de los mayas."},
+{c:"pip",t:"s",q:"Hablaban náhuat.",a:"Pipiles",e:"El náhuat es el idioma de los pipiles."},
+{c:"pip",t:"s",q:"Su territorio era el Señorío de Cuzcatlán.",a:"Pipiles",e:"Cuzcatlán era el señorío de los pipiles."},
+{c:"pip",t:"s",q:"Llegaron en el siglo XI guiados por Topiltzin Acxitl.",a:"Pipiles",e:"Los pipiles llegaron guiados por Topiltzin Acxitl."},
+{c:"pip",t:"s",q:"Su nombre significa «nobles» o «príncipes».",a:"Pipiles",e:"«Pipil» = nobles o príncipes."}
+];
+const CARDS={
+pre:[["¿Qué son las culturas precolombinas?","Pueblos que vivieron en América antes de la llegada de los españoles (Colón llegó en 1492)."],["Ejemplos","Mayas, aztecas, incas, pipiles y lencas."],["Mesoamérica","Región desde el centro de México hasta parte de Centroamérica. El Salvador está en ella."],["¿Qué cultivaban?","Maíz, frijol, calabaza, chile y cacao. ¡El maíz era lo más importante!"],["Pueblos en El Salvador","Mayas (occidente), pipiles (centro y occidente) y lencas (oriente)."]],
+may:[["Conocimientos de los mayas","Matemáticas, astronomía y arquitectura."],["Matemáticas","Usaban el cero y contaban de 20 en 20 (sistema vigesimal). Punto = 1, raya = 5."],["Astronomía","Observaban el sol, la luna y las estrellas. Hicieron calendarios muy exactos (365 y 260 días)."],["Arquitectura","Pirámides y templos de piedra: Tikal (Guatemala) y Chichén Itzá (México)."],["Mayas en El Salvador","Tazumal (Santa Ana), San Andrés y Joya de Cerén (La Libertad)."],["Joya de Cerén","Pueblo cubierto por ceniza de un volcán. La «Pompeya de América»."],["Escritura","Usaban glifos y escribían libros llamados códices."]],
+pip:[["¿Quiénes eran los pipiles?","Pueblo indígena que habitó gran parte de El Salvador y hablaba náhuat."],["Origen","Venían de pueblos más antiguos: nahuas, mayas-quiché y aztecas. Fueron los pobladores más recientes."],["Nombres","Yaquis = «emigrantes». Pipiles = «nobles» o «príncipes»."],["Llegada","Llegaron en el siglo XI guiados por Topiltzin Acxitl."],["¿Dónde vivieron?","Centro y occidente: Ahuachapán, Santa Ana, Sonsonate, La Libertad, San Salvador, Cuscatlán, La Paz, Chalatenango y San Vicente."],["Señorío de Cuzcatlán","Su región. Cuzcatlán = «lugar de joyas o collares»."],["Cacao","Cultivo muy valioso; sus semillas se usaban como moneda."]]};
+Q.forEach((q,i)=>q.id=i);
+const $=id=>document.getElementById(id);
+let pool=[],cur=null,score=0,streak=0,done=0,missed={},answered=false,chal=false,timer=null,left=0,weight={},last=-1;
+$("best").textContent=localStorage.getItem("soc_best")||0;
+function show(id){["home","study","play","sum"].forEach(x=>$(x).classList.toggle("hid",x!==id))}
+function home(){stop();$("best").textContent=localStorage.getItem("soc_best")||0;show("home")}
+function sel(){const s=[...document.querySelectorAll("#topics input:checked")].map(i=>i.value);return s.length?s:["pre","may","pip"]}
+let fcT="pre",fcI=0,fcF=false;
+function showStudy(){$("stTabs").innerHTML=Object.keys(TN).map(k=>`<button class="btn ${k==fcT?'g':'gray'}" onclick="fcT='${k}';fcI=0;showStudy()">${TN[k]}</button>`).join("");$("stTitle").textContent="📖 "+TN[fcT];fcF=false;drawFc();show("study")}
+function drawFc(){const c=CARDS[fcT][fcI];$("fc").innerHTML=fcF?`<div>${c[1]}</div>`:`<b>${c[0]}</b>`}
+function flip(){fcF=!fcF;drawFc()}
+function moveFc(d){const n=CARDS[fcT].length;fcI=(fcI+d+n)%n;fcF=false;drawFc();$("stTitle").textContent=`📖 ${TN[fcT]} (${fcI+1}/${n})`}
+function begin(list,isChal){pool=list;score=0;streak=0;done=0;missed={};weight={};last=-1;chal=isChal;list.forEach(q=>weight[q.id]=1);
+$("sc").textContent=0;$("st").textContent=0;show("play");stop();
+if(chal){left=60;$("tm").classList.remove("hid");$("tm").textContent="⏱️ 60";timer=setInterval(()=>{left--;$("tm").textContent="⏱️ "+left;if(left<=0)finish()},1000)}else $("tm").classList.add("hid");next()}
+function startPractice(){const s=sel();begin(Q.filter(q=>s.includes(q.c)),false)}
+function startChallenge(){const s=sel();begin(Q.filter(q=>s.includes(q.c)),true)}
+function repeatErrors(){begin(Q.filter(q=>missed[q.id]),false)}
+function stop(){if(timer){clearInterval(timer);timer=null}}
+function pick(){let tot=0;const c=pool.filter(q=>q.id!==last||pool.length==1);c.forEach(q=>tot+=weight[q.id]);let r=Math.random()*tot;for(const q of c){r-=weight[q.id];if(r<=0)return q}return c[0]}
+function shuf(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function next(){cur=pick();last=cur.id;answered=false;$("tg").textContent=TN[cur.c]+(cur.t=="s"?" · ¿Mayas o Pipiles?":cur.t=="v"?" · ¿Verdadero o falso?":"");
+$("qt").textContent=cur.t=="s"?"¿Quiénes eran? "+cur.q:cur.q;$("cnt").textContent="Preguntas: "+done;
+let opts,right;if(cur.t=="m"){opts=shuf(cur.o);right=cur.o[0]}else if(cur.t=="v"){opts=["Verdadero","Falso"];right=cur.a?"Verdadero":"Falso"}else{opts=["Mayas","Pipiles"];right=cur.a}
+cur.right=right;$("opts").innerHTML="";opts.forEach(o=>{const b=document.createElement("button");b.className="btn opt";b.textContent=o;b.onclick=()=>answer(b,o);$("opts").appendChild(b)});
+$("msg").textContent="";$("exp").classList.add("hid");$("nx").classList.add("hid")}
+const GOOD=["¡Muy bien! 🎉","¡Excelente! ⭐","¡Correcto! 👏","¡Eres un crack! 🚀","¡Súper! 💪"];
+function answer(b,o){if(answered)return;answered=true;done++;const ok=o===cur.right;
+[...$("opts").children].forEach(x=>{if(x.textContent===cur.right)x.classList.add("ok")});
+if(ok){score++;streak++;weight[cur.id]=Math.max(1,weight[cur.id]-1);$("msg").textContent=GOOD[Math.floor(Math.random()*GOOD.length)]+(streak>=3?` ¡Racha de ${streak}! 🔥`:"")}
+else{b.classList.add("bad");streak=0;missed[cur.id]=1;weight[cur.id]+=3;$("msg").textContent="¡Casi! Mira la respuesta correcta 💡"}
+$("sc").textContent=score;$("st").textContent=streak;$("cnt").textContent="Preguntas: "+done;
+if(chal){setTimeout(()=>{if(chal&&left>0)next()},ok?600:1600);return}
+$("exp").textContent="ℹ️ "+cur.e;$("exp").classList.remove("hid");$("nx").classList.remove("hid")}
+function finish(){stop();const wasChal=chal;chal=false;let t="¡Buen trabajo, amiguito! 🌟";
+if(wasChal){const best=+(localStorage.getItem("soc_best")||0);if(score>best){localStorage.setItem("soc_best",score);t="🏆 ¡Nuevo récord: "+score+"!"}}
+$("sumT").textContent=t;$("sumP").textContent=`Respondiste bien ${score} de ${done} preguntas.`;
+const m=Q.filter(q=>missed[q.id]);$("sumL").innerHTML=m.length?"<h3>Para repasar:</h3><ul>"+m.map(q=>`<li><b>${q.q}</b><br>✔️ ${q.t=="m"?q.o[0]:q.t=="v"?(q.a?"Verdadero":"Falso"):q.a} — ${q.e}</li>`).join("")+"</ul>":"<p>¡No tuviste errores! 🎉</p>";
+$("rep").classList.toggle("hid",!m.length);show("sum")}
+</script></body></html>
