@@ -16,18 +16,18 @@
 .fc{min-height:200px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:1.4rem;cursor:pointer;background:#e8f3ff}
 .timer{font-size:2rem;text-align:center;font-weight:800;color:#c7362b}.hid{display:none}.msg{font-size:1.3rem;text-align:center;font-weight:700;min-height:1.6em}
 ul{font-size:1.1rem}li{margin:6px 0}
-</style></head><body><div class="wrap">
+</style><style>.chk{display:inline-block;margin-left:10px;background:#22a35a;color:#fff;border-radius:50%;width:2rem;height:2rem;line-height:2rem;text-align:center;font-size:1.3rem;font-weight:900;vertical-align:middle}.chk.no{display:none}</style></head><body><div class="wrap">
 <h1>🏛️ Sociales: Mayas y Pipiles</h1>
 <div id="home" class="card">
 <p style="font-size:1.2rem;text-align:center">¡Hola, <span class="nm">amiguito</span>! ¡Vamos a aprender sobre los mayas y los pipiles! <a href="#" onclick="cambiarNombre();return false" style="font-size:.9rem;color:#2b8de2;white-space:nowrap">✏️ Cambiar nombre</a></p>
 <button class="btn g" onclick="showStudy()">📖 Estudiar</button>
 <div class="topics" id="topics">
-<label><input type="checkbox" value="pre" checked>🌎 Culturas precolombinas</label>
-<label><input type="checkbox" value="may" checked>🔺 Los mayas</label>
-<label><input type="checkbox" value="pip" checked>🌱 Los pipiles</label>
+<label><input type="checkbox" value="pre" checked>🌎 Culturas precolombinas<span class="chk no" data-t="pre" title="¡Tema superado!">✔</span></label>
+<label><input type="checkbox" value="may" checked>🔺 Los mayas<span class="chk no" data-t="may" title="¡Tema superado!">✔</span></label>
+<label><input type="checkbox" value="pip" checked>🌱 Los pipiles<span class="chk no" data-t="pip" title="¡Tema superado!">✔</span></label>
 </div>
 <div class="row"><button class="btn" onclick="startPractice()">✏️ Practicar</button><button class="btn o" onclick="startChallenge()">⏱️ Desafío 60 s</button></div>
-<p style="text-align:center;font-size:1.1rem">🏆 Récord del desafío: <b id="best">0</b></p>
+<p style="text-align:center;font-size:1.1rem">✅ Supera el desafío con <b>13 o más y sin errores</b> para ganar el check verde.<br>🏆 Récord del desafío: <b id="best">0</b></p>
 </div>
 <div id="study" class="card hid">
 <h2 id="stTitle"></h2><div class="row" id="stTabs"></div>
@@ -50,6 +50,8 @@ ul{font-size:1.1rem}li{margin:6px 0}
 <button class="btn" onclick="home()">🏠 Inicio</button></div>
 </div>
 <script>
+let chalT=[];const CK="sociales_check_sociales";function getCk(){try{return JSON.parse(localStorage.getItem(CK)||"[]")}catch(e){return[]}}
+function drawCk(){const c=getCk();document.querySelectorAll(".chk").forEach(e=>e.classList.toggle("no",!c.includes(e.dataset.t)))}
 const TN={pre:"Culturas precolombinas",may:"Los mayas",pip:"Los pipiles"};
 // t: m=opción múltiple, v=verdadero/falso, s=¿mayas o pipiles?
 const Q=[
@@ -114,7 +116,7 @@ const $=id=>document.getElementById(id);
 let pool=[],cur=null,score=0,streak=0,done=0,missed={},answered=false,chal=false,timer=null,left=0,weight={},last=-1;
 $("best").textContent=localStorage.getItem("soc_best")||0;
 function show(id){["home","study","play","sum"].forEach(x=>$(x).classList.toggle("hid",x!==id))}
-function home(){stop();$("best").textContent=localStorage.getItem("soc_best")||0;show("home")}
+function home(){stop();drawCk();$("best").textContent=localStorage.getItem("soc_best")||0;show("home")}
 function sel(){const s=[...document.querySelectorAll("#topics input:checked")].map(i=>i.value);return s.length?s:["pre","may","pip"]}
 let fcT="pre",fcI=0,fcF=false;
 function showStudy(){$("stTabs").innerHTML=Object.keys(TN).map(k=>`<button class="btn ${k==fcT?'g':'gray'}" onclick="fcT='${k}';fcI=0;showStudy()">${TN[k]}</button>`).join("");$("stTitle").textContent="📖 "+TN[fcT];fcF=false;drawFc();show("study")}
@@ -125,7 +127,7 @@ function begin(list,isChal){pool=list;score=0;streak=0;done=0;missed={};weight={
 $("sc").textContent=0;$("st").textContent=0;show("play");stop();
 if(chal){left=60;$("tm").classList.remove("hid");$("tm").textContent="⏱️ 60";timer=setInterval(()=>{left--;$("tm").textContent="⏱️ "+left;if(left<=0)finish()},1000)}else $("tm").classList.add("hid");next()}
 function startPractice(){const s=sel();begin(Q.filter(q=>s.includes(q.c)),false)}
-function startChallenge(){const s=sel();begin(Q.filter(q=>s.includes(q.c)),true)}
+function startChallenge(){const s=sel();chalT=s;begin(Q.filter(q=>s.includes(q.c)),true)}
 function repeatErrors(){begin(Q.filter(q=>missed[q.id]),false)}
 function stop(){if(timer){clearInterval(timer);timer=null}}
 function pick(){let tot=0;const c=pool.filter(q=>q.id!==last||pool.length==1);c.forEach(q=>tot+=weight[q.id]);let r=Math.random()*tot;for(const q of c){r-=weight[q.id];if(r<=0)return q}return c[0]}
@@ -145,6 +147,7 @@ if(chal){setTimeout(()=>{if(chal&&left>0)next()},ok?600:1600);return}
 $("exp").textContent="ℹ️ "+cur.e;$("exp").classList.remove("hid");$("nx").classList.remove("hid")}
 function finish(){stop();const wasChal=chal;chal=false;let t="¡Buen trabajo, "+NM()+"! 🌟";
 if(wasChal){const best=+(localStorage.getItem("soc_best")||0);if(score>best){localStorage.setItem("soc_best",score);t="🏆 ¡Nuevo récord: "+score+"!"}}
+if(wasChal&&score>=13&&done===score){const c=getCk();let nuevo=false;chalT.forEach(x=>{if(!c.includes(x)){c.push(x);nuevo=true}});localStorage.setItem(CK,JSON.stringify(c));drawCk();t="✅ ¡Tema superado! "+score+" sin errores. ¡Bravo, "+(window.NM?NM():"amiguito")+"!"}
 $("sumT").textContent=t;$("sumP").textContent=`Respondiste bien ${score} de ${done} preguntas.`;
 const m=Q.filter(q=>missed[q.id]);$("sumL").innerHTML=m.length?"<h3>Para repasar:</h3><ul>"+m.map(q=>`<li><b>${q.q}</b><br>✔️ ${q.t=="m"?q.o[0]:q.t=="v"?(q.a?"Verdadero":"Falso"):q.a} — ${q.e}</li>`).join("")+"</ul>":"<p>¡No tuviste errores! 🎉</p>";
 $("rep").classList.toggle("hid",!m.length);show("sum")}
@@ -171,4 +174,4 @@ apply();
 if(window.ASK_NAME&&NM()=="amiguito")cambiarNombre();
 })();
 </script>
-</body></html>
+<script>drawCk()</script></body></html>
